@@ -1,0 +1,216 @@
+TÍTULO: Reglas y plantillas para traducir OpenTofu/Terraform → Descripción de Arquitectura de Microservicios
+VERSIÓN: 1.0
+AUTOR: (tu nombre)
+PROPÓSITO: Extraer evidencia desde recursos IaC y redactar una descripción arquitectónica con justificaciones trazables.
+
+──────────────────────────────────────────────────────────────────────────────
+0) CÓMO USAR ESTE CONOCIMIENTO
+- Entrada: código IaC (módulos y recursos .tf/.tf.json) y variables.
+- Proceso: aplicar las reglas de “detección de evidencia” y usar las plantillas
+  de redacción para cada dimensión (Modularidad, Servicios Independientes, 
+  Comunicación Asíncrona, Despliegue Distribuido).
+- Salida: un informe en texto estructurado (ver Plantilla de Informe).
+
+Opcional: acompañar con un resumen C4 (Context/Container) y ADRs si existe evidencia.
+
+──────────────────────────────────────────────────────────────────────────────
+1) IDENTIFICACIÓN DE "SERVICIO" (unidad de despliegue)
+Se considera “servicio” a todo artefacto desplegable de manera autónoma (deployment ECS/EKS/K8s, Lambda/Functions, AppService/CloudRun, etc.)
+Evidencias típicas en Terraform/OpenTofu:
+- Kubernetes/EKS/K8s: kubernetes_deployment, kubernetes_stateful_set, helm_release
+- AWS: aws_ecs_service, aws_ecs_task_definition, aws_lambda_function,
+       aws_appautoscaling_target, aws_appautoscaling_policy, aws_cloudwatch_log_group
+- GCP: google_cloud_run_service, google_compute_instance_group_manager
+- Azure: azurerm_linux_web_app, azurerm_kubernetes_pod / helm_release
+- Infra de entrada: aws_lb / aws_lb_target_group / aws_apigatewayv2_api / 
+  aws_appmesh_* / aws_cloudmap_service (service discovery)
+- Observabilidad: aws_cloudwatch_dashboard/metric_alarm, datadog_monitor, etc.
+
+Heurística: “Una combinación de [workload + scaling + networking + logs/metrics] 
+definen una unidad de servicio”.
+
+──────────────────────────────────────────────────────────────────────────────
+2) MODULARIDAD
+Definición: Separación por módulos con límites claros (código y estado), inputs/outputs mínimos y reutilizables.
+
+Evidencias fuertes (sumar +2 cada una):
+- Cada servicio se define en su propio module "service_*" o carpeta dedicada.
+- Estados separados (backend config distinto o workspaces por servicio).
+- Interfaces declaradas vía variables/outputs (sin acceso cruzado a recursos internos).
+- Reutilización de módulos (module "service_orders", module "service_payments", etc.).
+
+Evidencias medias (sumar +1):
+- Módulos por capa técnica (network, data, compute) con relaciones limpias.
+- Tagging consistente por servicio (Name, Service, Owner, CostCenter).
+
+Antipatrones (-1 / -2):
+- Un solo módulo “monolítico” abarcando múltiples servicios.
+- Variables que exponen detalles internos de otro módulo (fuga de encapsulamiento).
+- Depende de “data” o “remote state” para acoplar recursos finos entre servicios (acoplamiento fuerte).
+
+Salida sugerida (plantilla):
+“Modularidad: {ALTA|MEDIA|BAJA}. Evidencias: {lista}. Antipatrones: {lista}. 
+Conclusión: {frase}.”
+
+──────────────────────────────────────────────────────────────────────────────
+3) SERVICIOS INDEPENDIENTES (desac acoplamiento + despliegue autónomo)
+Definición: Cada servicio puede versionarse, escalarse y desplegarse sin bloquear a otros.
+
+Evidencias fuertes (+2):
+- Autoescalado por servicio (aws_appautoscaling_target/policy, HPA en K8s).
+- Pipelines/generación de imágenes por servicio (referencia a imagen/tag por servicio en task_definition/helm).
+- Seguridad/red por servicio (security groups dedicados, network policies).
+
+Evidencias medias (+1):
+- Bases de datos por servicio (schemas o instancias separadas), o al menos credenciales/roles dedicados.
+- Health checks/target groups por servicio (ALB/NGINX/Ingress por servicio).
+- Service discovery (Cloud Map, Consul, App Mesh) para desacoplar endpoints.
+
+Antipatrones:
+- DB compartida fuertemente acoplada (todo a una sola instancia/DB).
+- “deploy all” (un único pipeline que empuja todo junto).
+- Reglas de SG/VPC que mezclan tráfico interno de varios servicios sin restricciones.
+
+Plantilla:
+“Servicios independientes: {ALTO|MEDIO|BAJO}. Evidencias: {…}. 
+Riesgos/antipatrones detectados: {…}. Conclusión: {…}.”
+
+──────────────────────────────────────────────────────────────────────────────
+4) COMUNICACIÓN ASÍNCRONA
+Definición: Uso de colas, tópicos o buses de eventos que desacoplan productores/consumidores.
+
+Evidencias fuertes (+2):
+- AWS: aws_sqs_queue, aws_sns_topic, aws_eventbridge_bus/rule, aws_kinesis_stream
+- Kafka: recursos kafka_* (MSK) o módulos Helm (bitnami/kafka) en K8s.
+- GCP: google_pubsub_topic/subscription; Azure: azurerm_servicebus_namespace/queue/topic
+- Patrón de integración: lambda triggers/ecs tasks → desde colas/tópicos.
+
+Evidencias medias (+1):
+- Retries/Dead-letter queues (DLQ).
+- Publicación de eventos de dominio (nombres de topics o reglas por bounded context).
+
+Antipatrones:
+- Solo HTTP síncrono para procesos críticos de negocio (sin buffering/cola).
+- Dependencias directas servicio↔servicio sin resiliencia/timeout/circuit breaker.
+
+Plantilla:
+“Comunicación asíncrona: {ALTA|MEDIA|BAJA}. Evidencias: {…}. Antipatrones: {…}. 
+Impacto: {latencia tolerable, desac acoplamiento, resiliencia}. Conclusión: {…}.”
+
+──────────────────────────────────────────────────────────────────────────────
+5) DESPLIEGUE DISTRIBUIDO (alta disp./multi-AZ/geo)
+Definición: Topología replicada en zonas/regiones, balanceo, tolerancia a fallos.
+
+Evidencias fuertes (+2):
+- Múltiples subnets/availability_zones (var.azs; count/for_each por AZ).
+- Balanceadores (aws_lb / ingress) con health checks y target groups.
+- Réplicas en K8s (spec.replicas > 1), node pools en varias AZ.
+- Providers con alias multirregión + recursos duplicados por región + DNS/Route53 health checks.
+- Data distribuida: read replicas, multi-AZ RDS, cross-region replication (S3/Mongo/ES).
+
+Evidencias medias (+1):
+- Auto Scaling Groups/Managed Instance Groups.
+- CDN/edge (CloudFront/Cloud CDN) para latencias.
+
+Antipatrones:
+- Single-AZ.
+- Puntos únicos de fallo (un LB para todo, una sola DB sin HA).
+- Falta de health checks.
+
+Plantilla:
+“Despliegue distribuido: {ALTO|MEDIO|BAJO}. Evidencias: {…}. Riesgos: {…}. 
+Conclusión: {…}.”
+
+──────────────────────────────────────────────────────────────────────────────
+6) PUNTAJE Y VEREDICTO
+Escala por dimensión: 0–6 (BAJO 0–2 | MEDIO 3–4 | ALTO 5–6).
+
+Cálculo:
+- Suma de evidencias positivas y negativas por dimensión.
+- Clasificación final (ALTO/MEDIO/BAJO) y breve justificación.
+
+──────────────────────────────────────────────────────────────────────────────
+7) TABLA DE MAPEOS (ATAJO)
+AWS (ejemplos):
+- Servicio: aws_ecs_service / aws_lambda_function / kubernetes_deployment
+- Asíncrono: aws_sqs_queue / aws_sns_topic / aws_eventbridge_* / kafka_*
+- Distribuido: subnets en varias AZ, aws_lb + target groups, RDS multi-AZ
+- Independencia: appautoscaling por servicio, SG dedicados, imágenes por servicio
+- Modularidad: módulos por servicio + states separados + outputs mínimos
+
+GCP (ejemplos):
+- Servicio: google_cloud_run_service / GKE deployment
+- Asíncrono: google_pubsub_topic/subscription
+- Distribuido: múltiples zonas/regiones, load balancers
+- Independencia: autoscaling por servicio, VPC firewall rules por servicio
+
+Azure (ejemplos):
+- Servicio: azurerm_linux_web_app / AKS deployment
+- Asíncrono: azurerm_servicebus_queue/topic
+- Distribuido: zonas por región, Front Door/ALB, réplica de datos
+- Independencia: autoscaling y NSG por servicio
+
+Kubernetes genérico:
+- Servicio: Deployment/StatefulSet + HPA + Service + Ingress
+- Asíncrono: Kafka/RabbitMQ/Redis Streams (Helm) + CRDs
+- Distribuido: replicas >1 + node pools multi-AZ
+- Independencia: charts por servicio, values separados, namespaces por servicio
+
+──────────────────────────────────────────────────────────────────────────────
+8) PLANTILLA DE INFORME (PEGAR Y RELLENAR)
+[Nombre del sistema/proyecto]
+[Fecha]
+
+CONTEXTO
+- Proveedor(es): {AWS/GCP/Azure/K8s on-prem}
+- Inventario de servicios detectados: {N}; Lista breve: {service_a, service_b, …}
+- Notas de alcance: {repos/paths/branch}
+
+MODULARIDAD
+- Evidencias: {…}
+- Antipatrones: {…}
+- Clasificación: {ALTA|MEDIA|BAJA} (puntaje {x}/6)
+- Conclusión: {…}
+
+SERVICIOS INDEPENDIENTES
+- Evidencias: {…}
+- Antipatrones: {…}
+- Clasificación: {ALTO|MEDIO|BAJO} (puntaje {x}/6)
+- Conclusión: {…}
+
+COMUNICACIÓN ASÍNCRONA
+- Evidencias: {…}
+- Antipatrones: {…}
+- Clasificación: {ALTA|MEDIA|BAJA} (puntaje {x}/6)
+- Conclusión: {…}
+
+DESPLIEGUE DISTRIBUIDO
+- Evidencias: {…}
+- Antipatrones: {…}
+- Clasificación: {ALTO|MEDIO|BAJO} (puntaje {x}/6)
+- Conclusión: {…}
+
+RESUMEN EJECUTIVO
+- Fortalezas: {…}
+- Riesgos: {…}
+- Recomendaciones priorizadas (Top 3): {…}
+
+──────────────────────────────────────────────────────────────────────────────
+9) PLANTILLAS DE FRASES (COPIAR/PEGAR)
+- “Se observa modularidad {ALTA|MEDIA|BAJA} dado que {módulos por servicio / 
+   states separados / outputs acotados}. Se detecta {antipatrón} que podría 
+   generar {riesgo}.”
+- “Cada servicio posee escalado y pipeline independiente ({evidencias}), por lo 
+   que la independencia es {ALTA|MEDIA|BAJA}.”
+- “La presencia de {SQS/Kafka/EventBridge/PubSub} con DLQ y políticas de retry 
+   respalda comunicación asíncrona {ALTA|MEDIA|BAJA}.”
+- “El despliegue se distribuye en {multi-AZ/multirregión} con {LB/replicas}, 
+   alcanzando un nivel {ALTO|MEDIO|BAJO} de tolerancia a fallos.”
+
+──────────────────────────────────────────────────────────────────────────────
+10) LIMITACIONES Y SESGOS
+- El IaC no siempre refleja runtime (feature flags, timeouts, circuit breakers).
+- Puede existir shadow infra o servicios gestionados fuera del repo.
+- Confirmar con observabilidad (dashboards, alerts) y pipelines (CI/CD) si es posible.
+
+FIN DEL DOCUMENTO
