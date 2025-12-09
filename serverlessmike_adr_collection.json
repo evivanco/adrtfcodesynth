@@ -3,67 +3,67 @@
     "adr_name": "Migration to Microservices Architecture",
     "title": "Migration to Microservices Architecture",
     "status": "Accepted",
-    "motivation": "The existing hybrid architecture, while functional, is primarily monolithic with limited scalability and flexibility. The need to improve scalability, maintainability, and resilience drives the transition to a microservices architecture. This shift aims to enable independent deployment and scaling of services, reduce system complexity, and enhance system resilience by isolating failures.",
+    "motivation": "The existing hybrid architecture is primarily monolithic, which limits scalability, maintainability, and flexibility. The tightly coupled components and single deployment unit hinder the ability to scale individual parts of the application independently and adopt new technologies. A shift to a microservices architecture is needed to address these limitations and align with modern architectural practices, enabling independent deployment, scaling, and improved resilience.",
     "decision_drivers": [
-      "Need for improved scalability and flexibility.",
-      "Desire for independent deployment and development of services.",
-      "Requirement for enhanced resilience and fault tolerance.",
-      "Organizational push towards modern architecture patterns."
+      "Need for improved scalability and flexibility",
+      "Desire to enhance maintainability and ease of updates",
+      "Requirement for independent deployment and scaling of services",
+      "Organizational push towards adopting modern architectural patterns"
     ],
-    "main_decision": "The decision is to migrate the application from a hybrid monolithic architecture to a fully microservices-based architecture. This involves decomposing the monolithic application into smaller, independent services that can be developed, deployed, and scaled independently. Each service will be responsible for a specific business function and will communicate with others through well-defined APIs, primarily using HTTP/REST protocols. This approach will leverage AWS Lambda functions and an API Gateway to manage service interactions and provide a centralized entry point for client requests.",
+    "main_decision": "The decision is to migrate the application from a hybrid monolithic architecture to a fully microservices-based architecture. This involves decomposing the monolithic components into smaller, independent services, each responsible for a specific business capability. These services will communicate over a network using HTTP/REST and asynchronous messaging where appropriate. The architecture will leverage AWS Lambda functions and an API Gateway to manage requests and provide a centralized entry point for client interactions.",
     "alternatives": [
-      "Continue with the hybrid architecture: Maintain the current architecture with minor optimizations.",
-      "Adopt a service-oriented architecture (SOA): Transition to an SOA model with shared services and enterprise service buses."
+      "Continue with Hybrid Architecture**: Maintain the current architecture with minor improvements.",
+      "Adopt a Modular Monolith**: Refactor the monolith into a more modular design without fully transitioning to microservices."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Enhanced scalability by allowing independent scaling of services.\n    - Improved resilience as failures in one service do not affect others.\n    - Greater flexibility in technology choices for different services.\n- Alternative 1:\n  - Pros:\n    - Lower initial migration cost.\n    - Simplicity in maintaining a single codebase.\n- Alternative 2:\n  - Pros:\n    - Established patterns for enterprise integration.\n    - Centralized governance and security.",
-    "cons": "- Main decision:\n  - Cons:\n    - Increased complexity in managing distributed systems.\n    - Potential challenges in ensuring data consistency across services.\n- Alternative 1:\n  - Cons:\n    - Limited scalability and flexibility.\n    - Continued challenges with maintainability and resilience.\n- Alternative 2:\n  - Cons:\n    - Potential for increased overhead with centralized service management.\n    - Complexity in managing service interactions and dependencies.",
-    "consequences": "The migration to a microservices architecture will lead to improved scalability and resilience in the long term. However, it introduces short-term complexity in managing distributed systems and ensuring data consistency. The architecture will benefit from enhanced maintainability and flexibility, allowing for easier adoption of new technologies and frameworks.",
+    "pros": "- Main decision:\n  - Pros:\n    - Enables independent scaling and deployment of services.\n    - Facilitates the adoption of new technologies and practices.\n    - Improves system resilience and fault tolerance.\n- Continue with Hybrid Architecture:\n  - Pros:\n    - Minimal disruption to existing systems.\n    - Lower initial implementation cost.\n- Adopt a Modular Monolith:\n  - Pros:\n    - Retains some benefits of a monolith while improving modularity.\n    - Easier transition compared to a full microservices migration.",
+    "cons": "- Main decision:\n  - Cons:\n    - Increased complexity due to distributed nature.\n    - Requires significant refactoring and potential re-architecture.\n- Continue with Hybrid Architecture:\n  - Cons:\n    - Limited scalability and flexibility improvements.\n    - Continues to face maintainability challenges.\n- Adopt a Modular Monolith:\n  - Cons:\n    - May not fully realize the benefits of microservices.\n    - Still constrained by monolithic deployment limitations.",
+    "consequences": "The migration to a microservices architecture will enhance scalability, allowing individual services to be scaled based on demand. It will improve maintainability by enabling independent updates and deployments. However, it introduces complexity in managing distributed services and requires robust network infrastructure to handle inter-service communication. The transition will involve a significant initial investment in refactoring and re-architecture, but it will provide long-term benefits in flexibility and resilience.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A\n\n---",
+    "additional_information": "None\n\n---",
     "source_file": "serverlessmike_ADR_1.txt"
   },
   {
-    "adr_name": "Decomposition Strategy for Microservices",
-    "title": "Decomposition Strategy for Microservices",
+    "adr_name": "Adoption of API Gateway",
+    "title": "Adoption of API Gateway",
     "status": "Accepted",
-    "motivation": "To transition from a monolithic to a microservices architecture, a clear strategy is needed to decompose the existing application into smaller, manageable services. This decision addresses the need for clear service boundaries and responsibilities to ensure effective service isolation and independent deployment.",
+    "motivation": "The current architecture lacks a centralized mechanism for managing client requests, leading to potential security and management challenges. An API Gateway is needed to provide a single entry point for client interactions, enabling request routing, authentication, and rate limiting. This will enhance security, manageability, and scalability of the application.",
     "decision_drivers": [
-      "Requirement for clear service boundaries and responsibilities.",
-      "Need for independent deployment and scaling of services.",
-      "Desire to minimize inter-service dependencies."
+      "Need for centralized request management",
+      "Requirement for enhanced security and authentication",
+      "Desire for improved scalability and request handling"
     ],
-    "main_decision": "The decision is to decompose the monolithic application into domain-driven microservices, each responsible for a specific business capability. This involves identifying core business domains and subdomains, then aligning services with these domains. Each service will encapsulate its own data and logic, minimizing dependencies on other services. The decomposition will follow domain-driven design principles to ensure that services are cohesive and loosely coupled.",
+    "main_decision": "The decision is to adopt an API Gateway as the centralized entry point for all client requests. The API Gateway will handle routing requests to the appropriate microservices, manage authentication and authorization, and enforce rate limiting and other policies. This will streamline request management and enhance the overall security and scalability of the application.",
     "alternatives": [
-      "Decompose by technical layers: Separate services based on technical layers such as presentation, business logic, and data access.",
-      "Decompose by feature: Create services based on individual features or functionalities."
+      "Direct Service Access**: Allow clients to interact directly with individual services.",
+      "Custom Middleware**: Develop a custom middleware solution for request management."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Aligns services with business capabilities, enhancing domain understanding.\n    - Promotes loose coupling and high cohesion within services.\n- Alternative 1:\n  - Pros:\n    - Simplifies initial decomposition by following existing technical layers.\n- Alternative 2:\n  - Pros:\n    - Focuses on delivering specific features, potentially accelerating development.",
-    "cons": "- Main decision:\n  - Cons:\n    - Requires deep domain knowledge and analysis.\n    - Potentially complex initial setup to define domain boundaries.\n- Alternative 1:\n  - Cons:\n    - May lead to tightly coupled services with shared dependencies.\n- Alternative 2:\n  - Cons:\n    - Risk of creating services that are too granular and difficult to manage.",
-    "consequences": "The chosen decomposition strategy will result in services that are well-aligned with business domains, enhancing maintainability and scalability. However, it requires significant upfront effort to understand and define domain boundaries, which may delay initial implementation.",
+    "pros": "- Main decision:\n  - Pros:\n    - Provides a centralized point for managing requests and enforcing policies.\n    - Enhances security through integrated authentication and authorization.\n    - Simplifies client interactions with a single entry point.\n- Direct Service Access:\n  - Pros:\n    - Simplifies architecture by removing an additional layer.\n    - Reduces latency by eliminating an intermediary.\n- Custom Middleware:\n  - Pros:\n    - Allows for tailored request management solutions.\n    - Provides flexibility in implementing custom policies.",
+    "cons": "- Main decision:\n  - Cons:\n    - Introduces additional complexity and potential latency.\n    - Requires management and configuration of the API Gateway.\n- Direct Service Access:\n  - Cons:\n    - Increases security risks with multiple exposed endpoints.\n    - Complicates request management and policy enforcement.\n- Custom Middleware:\n  - Cons:\n    - Requires development and maintenance of custom solutions.\n    - May not provide the robustness and features of a dedicated API Gateway.",
+    "consequences": "The adoption of an API Gateway will centralize request management, enhancing security and scalability. It will simplify client interactions and provide a robust mechanism for enforcing policies. However, it introduces additional complexity and potential latency, requiring careful management and configuration. The long-term benefits include improved security, scalability, and manageability of the application.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A\n\n---",
+    "additional_information": "None\n\n---",
     "source_file": "serverlessmike_ADR_2.txt"
   },
   {
-    "adr_name": "Communication Style for Microservices",
-    "title": "Communication Style for Microservices",
+    "adr_name": "Use of AWS Lambda for Serverless Functions",
+    "title": "Use of AWS Lambda for Serverless Functions",
     "status": "Accepted",
-    "motivation": "Effective communication between microservices is crucial for ensuring system reliability and performance. The decision addresses the need for a robust communication mechanism that supports both synchronous and asynchronous interactions, enabling services to communicate efficiently while maintaining loose coupling.",
+    "motivation": "The existing architecture relies heavily on a monolithic deployment, which limits scalability and flexibility. AWS Lambda offers a serverless computing model that can enhance scalability and reduce operational overhead by allowing functions to be executed in response to events. This decision aims to leverage serverless functions for specific tasks, improving scalability and reducing costs.",
     "decision_drivers": [
-      "Requirement for reliable inter-service communication.",
-      "Need for both synchronous and asynchronous communication patterns.",
-      "Desire to minimize latency and maximize throughput."
+      "Need for improved scalability and cost-efficiency",
+      "Requirement for reduced operational overhead",
+      "Desire to adopt modern serverless computing practices"
     ],
-    "main_decision": "The decision is to adopt a hybrid communication style that combines synchronous HTTP/REST for real-time interactions and asynchronous messaging for decoupled communication. HTTP/REST will be used for request-response interactions where immediate feedback is required, while AWS SNS or SQS will be employed for asynchronous messaging to handle events and notifications. This approach balances the need for real-time communication with the benefits of decoupling services through asynchronous messaging.",
+    "main_decision": "The decision is to utilize AWS Lambda for specific serverless functions within the application. These functions will handle tasks that benefit from event-driven execution, such as processing asynchronous events, handling background jobs, and integrating with third-party services. This approach will enhance scalability and reduce the need for managing server infrastructure.",
     "alternatives": [
-      "Synchronous-only communication: Use HTTP/REST exclusively for all inter-service communication.",
-      "Asynchronous-only communication: Rely solely on messaging queues for all interactions."
+      "Traditional Server-Based Execution**: Continue using EC2 instances for all processing tasks.",
+      "Container-Based Execution**: Use containers to manage and scale specific tasks."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Provides flexibility to choose the appropriate communication style based on use case.\n    - Enhances system resilience by decoupling services through asynchronous messaging.\n- Alternative 1:\n  - Pros:\n    - Simplicity in using a single communication protocol.\n- Alternative 2:\n  - Pros:\n    - High decoupling and resilience through asynchronous interactions.",
-    "cons": "- Main decision:\n  - Cons:\n    - Increased complexity in managing two communication styles.\n    - Potential challenges in ensuring consistency between synchronous and asynchronous interactions.\n- Alternative 1:\n  - Cons:\n    - Potential bottlenecks and latency issues in high-load scenarios.\n- Alternative 2:\n  - Cons:\n    - Increased complexity in managing message queues and ensuring message delivery.",
-    "consequences": "The hybrid communication style will enhance system flexibility and resilience, allowing services to communicate efficiently based on their interaction needs. However, it introduces complexity in managing different communication protocols and ensuring consistency across interactions.",
+    "pros": "- Main decision:\n  - Pros:\n    - Automatically scales with demand, reducing operational overhead.\n    - Cost-efficient as billing is based on actual usage.\n    - Simplifies infrastructure management by eliminating server maintenance.\n- Traditional Server-Based Execution:\n  - Pros:\n    - Provides full control over server environment and resources.\n    - Easier to implement with existing infrastructure.\n- Container-Based Execution:\n  - Pros:\n    - Offers flexibility in managing and scaling tasks.\n    - Provides isolation and resource control for specific tasks.",
+    "cons": "- Main decision:\n  - Cons:\n    - Limited execution time and resource constraints.\n    - Requires adaptation to a serverless computing model.\n- Traditional Server-Based Execution:\n  - Cons:\n    - Higher operational overhead and cost.\n    - Limited scalability and flexibility.\n- Container-Based Execution:\n  - Cons:\n    - Requires container orchestration and management.\n    - May introduce additional complexity in deployment and scaling.",
+    "consequences": "The use of AWS Lambda for serverless functions will enhance scalability and reduce operational costs by allowing functions to scale automatically with demand. It simplifies infrastructure management by eliminating the need for server maintenance. However, it introduces constraints on execution time and resources, requiring adaptation to a serverless model. The long-term benefits include improved scalability, cost-efficiency, and reduced operational overhead.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A\n\n---",
+    "additional_information": "None",
     "source_file": "serverlessmike_ADR_3.txt"
   },
   {

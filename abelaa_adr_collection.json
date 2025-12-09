@@ -12,129 +12,114 @@
     "consequences": "",
     "validation": "",
     "additional_information": "",
-    "source_file": "ADR_1.txt"
+    "source_file": "abelaa_ADR_1.txt"
   },
   {
-    "adr_name": "Migration to Microservices Architecture",
-    "title": "Migration to Microservices Architecture",
+    "adr_name": "Transition to Microservices Architecture",
+    "title": "Transition to Microservices Architecture",
     "status": "Accepted",
-    "motivation": "The existing hybrid architecture, while incorporating a serverless component, remains largely monolithic, limiting scalability, flexibility, and maintainability. Migrating to a microservices architecture allows for independent scaling, deployment, and management of services, aligning the system with modern architectural practices and addressing current and future business needs.",
+    "motivation": "The current monolithic architecture limits scalability, maintainability, and resilience. As the application grows, these limitations hinder the ability to efficiently manage and scale the system. Transitioning to a microservices architecture allows for independent scaling, improved fault isolation, and better alignment with modern software development practices.",
     "decision_drivers": [
-      "Need for improved scalability and flexibility",
-      "Desire for independent deployment and management of services",
-      "Requirement for enhanced system resilience and fault isolation",
-      "Organizational shift towards modern architectural practices"
+      "Need for improved scalability to handle increased demand.",
+      "Desire for enhanced maintainability to simplify updates and modifications.",
+      "Requirement for better fault isolation to minimize the impact of failures.",
+      "Organizational shift towards agile and DevOps practices."
     ],
-    "main_decision": "The decision is to migrate the application from a hybrid architecture to a fully microservices-based architecture. This involves decomposing the monolithic application into independent services, each responsible for a specific business capability, and deploying them as AWS Lambda functions. An API Gateway will be used to route requests to the appropriate services, facilitating synchronous communication. This approach addresses the need for scalability, flexibility, and resilience by allowing each service to be developed, deployed, and scaled independently.",
+    "main_decision": "The decision is to decompose the existing monolithic application into a set of loosely coupled microservices. Each microservice will be independently deployable and focused on a specific business capability. This transition will involve identifying and isolating components that can be refactored into services, implementing service communication through APIs, and adopting a decentralized data management approach.",
     "alternatives": [
-      "Maintain the hybrid architecture with incremental serverless adoption",
-      "Adopt a container-based microservices architecture using ECS or EKS"
+      "Maintain the monolithic architecture and optimize it for performance.",
+      "Adopt a hybrid approach with selective microservices for critical components."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Enables independent scaling and deployment of services\n    - Enhances system resilience and fault isolation\n    - Aligns with modern architectural practices\n- Alternative 1:\n  - Pros:\n    - Gradual transition with lower initial disruption\n    - Retains existing monolithic strengths while adopting serverless benefits\n- Alternative 2:\n  - Pros:\n    - Provides container orchestration benefits\n    - Supports more complex service interactions and stateful services",
-    "cons": "- Main decision:\n  - Cons:\n    - Increased complexity in service orchestration and management\n    - Potential for increased network latency due to inter-service communication\n- Alternative 1:\n  - Cons:\n    - Limited scalability and flexibility improvements\n    - Continued reliance on monolithic core\n- Alternative 2:\n  - Cons:\n    - Higher operational overhead for managing container infrastructure\n    - Requires additional expertise in container orchestration",
-    "consequences": "Migrating to a microservices architecture will improve scalability, flexibility, and resilience, allowing the system to better handle growth and change. However, it introduces complexity in service orchestration and management, requiring careful planning and execution. Short-term challenges include increased development and operational complexity, while long-term benefits include enhanced adaptability and alignment with modern practices.",
+    "pros": "- Main decision:\n  - Pros:\n    - Enables independent scaling of services.\n    - Improves fault isolation, reducing the impact of failures.\n    - Facilitates the use of diverse technologies and frameworks.\n- Alternative 1:\n  - Pros:\n    - Simplicity in maintaining a single codebase.\n    - Potential for optimized performance as a single unit.\n- Alternative 2:\n  - Pros:\n    - Gradual transition with lower initial disruption.\n    - Allows critical components to benefit from microservices advantages.",
+    "cons": "- Main decision:\n  - Cons:\n    - Increases system complexity due to service coordination.\n    - Requires significant refactoring effort and potential downtime.\n- Alternative 1:\n  - Cons:\n    - Limited scalability and maintainability as the application grows.\n    - Higher risk of downtime affecting the entire system.\n- Alternative 2:\n  - Cons:\n    - May not fully realize the benefits of a complete microservices architecture.\n    - Complexity in managing a mixed architecture environment.",
+    "consequences": "The transition to microservices will enhance scalability, maintainability, and resilience in the long term. However, it introduces short-term complexity and requires investment in refactoring and infrastructure changes. The architecture will be better aligned with modern practices, supporting agile development and continuous delivery.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A",
-    "source_file": "ADR_2.txt"
+    "additional_information": "- Related ADRs: None\n```\n\n```markdown",
+    "source_file": "abelaa_ADR_2.txt"
   },
   {
-    "adr_name": "Adoption of AWS API Gateway",
-    "title": "Adoption of AWS API Gateway",
+    "adr_name": "Implement API Gateway for Service Communication",
+    "title": "Implement API Gateway for Service Communication",
     "status": "Accepted",
-    "motivation": "To facilitate communication between microservices and provide a unified entry point for clients, an API Gateway is necessary. AWS API Gateway offers a managed solution that integrates seamlessly with AWS Lambda, supporting the desired synchronous communication style and enhancing security and monitoring capabilities.",
+    "motivation": "In a microservices architecture, managing communication between services is crucial. An API Gateway provides a centralized entry point for client requests, enabling efficient routing, security, and monitoring. This decision addresses the need for streamlined communication and management of APIs across multiple services.",
     "decision_drivers": [
-      "Need for a unified entry point for service requests",
-      "Requirement for secure and monitored communication",
-      "Desire for seamless integration with AWS Lambda functions"
+      "Requirement for centralized API management and security.",
+      "Need for efficient routing and load balancing of client requests.",
+      "Desire for enhanced monitoring and logging of API usage."
     ],
-    "main_decision": "The decision is to adopt AWS API Gateway as the entry point for all service requests in the microservices architecture. It will route requests to the appropriate AWS Lambda functions based on the URL path, supporting RESTful communication. This choice provides built-in security, monitoring, and scalability, aligning with the system's architectural goals.",
+    "main_decision": "The decision is to implement an API Gateway to handle all incoming requests to the microservices. The API Gateway will provide routing, load balancing, authentication, and monitoring capabilities. This approach simplifies client interactions and centralizes API management, enhancing security and observability.",
     "alternatives": [
-      "Use a custom-built API gateway solution",
-      "Leverage an open-source API gateway like Kong or Tyk"
+      "Direct client-to-service communication without a gateway.",
+      "Use of service mesh for internal service communication."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Seamless integration with AWS Lambda\n    - Built-in security, monitoring, and scaling features\n    - Reduced operational overhead with a managed service\n- Alternative 1:\n  - Pros:\n    - Full control over gateway implementation and features\n    - Potential cost savings if hosted on existing infrastructure\n- Alternative 2:\n  - Pros:\n    - Flexibility in deployment and customization\n    - Community support and plugins for additional features",
-    "cons": "- Main decision:\n  - Cons:\n    - Potential single point of failure if not distributed\n    - Dependency on AWS-specific services\n- Alternative 1:\n  - Cons:\n    - Higher development and maintenance effort\n    - Potential security and scalability challenges\n- Alternative 2:\n  - Cons:\n    - Requires additional expertise for deployment and management\n    - May not integrate as seamlessly with AWS Lambda",
-    "consequences": "Adopting AWS API Gateway simplifies service communication and management, providing a secure and scalable entry point for clients. It reduces operational overhead but introduces a dependency on AWS services. Proper configuration and distribution are necessary to mitigate risks associated with a single point of failure.",
+    "pros": "- Main decision:\n  - Pros:\n    - Centralizes API management, improving security and monitoring.\n    - Simplifies client interactions with a single entry point.\n    - Provides load balancing and routing capabilities.\n- Alternative 1:\n  - Pros:\n    - Reduces initial setup complexity.\n    - Direct communication may offer lower latency.\n- Alternative 2:\n  - Pros:\n    - Provides advanced service-to-service communication features.\n    - Enhances internal observability and resilience.",
+    "cons": "- Main decision:\n  - Cons:\n    - Introduces an additional layer of infrastructure.\n    - May increase latency due to routing through the gateway.\n- Alternative 1:\n  - Cons:\n    - Lacks centralized management and security features.\n    - Increases complexity for clients interacting with multiple services.\n- Alternative 2:\n  - Cons:\n    - Adds complexity to the internal architecture.\n    - Requires additional infrastructure and management.",
+    "consequences": "Implementing an API Gateway enhances security, monitoring, and management of APIs, supporting scalability and maintainability. However, it introduces infrastructure complexity and potential latency. The decision aligns with best practices for managing microservices communication.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A",
-    "source_file": "ADR_3.txt"
+    "additional_information": "- Related ADRs: None\n```\n\n```markdown",
+    "source_file": "abelaa_ADR_3.txt"
   },
   {
-    "adr_name": "Introduction of Independent Lambda Functions",
-    "title": "Introduction of Independent Lambda Functions",
+    "adr_name": "Adopt Asynchronous Communication with Messaging Queues",
+    "title": "Adopt Asynchronous Communication with Messaging Queues",
     "status": "Accepted",
-    "motivation": "The existing monolithic architecture limits the ability to independently deploy and scale specific functionalities. By introducing independent AWS Lambda functions for each business capability, the system can achieve greater flexibility, scalability, and maintainability.",
+    "motivation": "The need for decoupled communication between services in a microservices architecture is critical for improving fault tolerance and scalability. Asynchronous communication using messaging queues allows services to communicate without direct dependencies, enhancing resilience and enabling better load management.",
     "decision_drivers": [
-      "Requirement for independent deployment and scaling of services",
-      "Need for improved system flexibility and maintainability",
-      "Desire to leverage serverless benefits for specific functionalities"
+      "Requirement for decoupled and resilient service communication.",
+      "Need to handle varying loads and improve fault tolerance.",
+      "Desire to support event-driven architectures."
     ],
-    "main_decision": "The decision is to decompose the monolithic application into independent AWS Lambda functions, each responsible for a specific business capability such as payment processing. This approach allows for independent deployment and scaling, aligning with microservices principles and leveraging the benefits of serverless architecture.",
+    "main_decision": "The decision is to adopt asynchronous communication using messaging queues like AWS SQS or Kafka. This approach enables services to communicate through messages, allowing them to operate independently and handle failures gracefully. It supports event-driven patterns and improves the system's ability to manage varying loads.",
     "alternatives": [
-      "Retain monolithic architecture with serverless components",
-      "Use containerized microservices with AWS ECS or EKS"
+      "Synchronous RESTful API communication between services.",
+      "Use of service mesh for internal communication."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Enables independent deployment and scaling\n    - Reduces operational overhead with serverless architecture\n    - Enhances flexibility and maintainability\n- Alternative 1:\n  - Pros:\n    - Gradual transition with minimal disruption\n    - Retains existing monolithic strengths\n- Alternative 2:\n  - Pros:\n    - Supports more complex service interactions\n    - Provides container orchestration benefits",
-    "cons": "- Main decision:\n  - Cons:\n    - Increased complexity in service orchestration\n    - Potential for increased network latency\n- Alternative 1:\n  - Cons:\n    - Limited scalability and flexibility improvements\n    - Continued reliance on monolithic core\n- Alternative 2:\n  - Cons:\n    - Higher operational overhead for managing containers\n    - Requires additional expertise in container orchestration",
-    "consequences": "Introducing independent Lambda functions enhances flexibility, scalability, and maintainability, allowing the system to better adapt to changing requirements. However, it increases complexity in service orchestration and management. Short-term challenges include the need for careful planning and execution, while long-term benefits include improved adaptability and alignment with modern practices.",
+    "pros": "- Main decision:\n  - Pros:\n    - Decouples services, improving fault tolerance and scalability.\n    - Supports event-driven architectures and load leveling.\n    - Enhances resilience by allowing services to operate independently.\n- Alternative 1:\n  - Pros:\n    - Simplicity in implementation with direct communication.\n    - Lower latency for real-time interactions.\n- Alternative 2:\n  - Pros:\n    - Provides advanced features for service-to-service communication.\n    - Enhances internal observability and resilience.",
+    "cons": "- Main decision:\n  - Cons:\n    - Increases complexity with message queue management.\n    - Requires changes in service design to handle asynchronous patterns.\n- Alternative 1:\n  - Cons:\n    - Tight coupling between services, reducing fault tolerance.\n    - Challenges in handling varying loads and failures.\n- Alternative 2:\n  - Cons:\n    - Adds complexity to the internal architecture.\n    - Requires additional infrastructure and management.",
+    "consequences": "Adopting asynchronous communication enhances fault tolerance, scalability, and supports event-driven patterns. It introduces complexity in managing messaging infrastructure and requires changes in service design. The decision aligns with best practices for decoupled microservices communication.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A",
-    "source_file": "ADR_4.txt"
+    "additional_information": "- Related ADRs: None\n```\n\n```markdown",
+    "source_file": "abelaa_ADR_4.txt"
   },
   {
-    "adr_name": "Implementation of RESTful Communication via API Gateway",
-    "title": "Implementation of RESTful Communication via API Gateway",
+    "adr_name": "Decentralized Data Management with Polyglot Persistence",
+    "title": "Decentralized Data Management with Polyglot Persistence",
     "status": "Accepted",
-    "motivation": "To ensure efficient and standardized communication between microservices and clients, RESTful communication is necessary. AWS API Gateway provides a platform to implement RESTful APIs, facilitating synchronous communication and enhancing interoperability and ease of integration.",
+    "motivation": "In a microservices architecture, each service should manage its own data to ensure independence and scalability. Decentralizing data management allows services to choose the most appropriate data storage technology for their needs, improving performance and flexibility.",
     "decision_drivers": [
-      "Need for standardized communication between services and clients",
-      "Requirement for synchronous communication style",
-      "Desire for enhanced interoperability and integration"
+      "Requirement for independent data management by services.",
+      "Need for flexibility in choosing data storage technologies.",
+      "Desire to improve performance and scalability."
     ],
-    "main_decision": "The decision is to implement RESTful communication using AWS API Gateway, which will manage HTTP requests and route them to the appropriate AWS Lambda functions. This approach ensures efficient and standardized communication, aligning with microservices principles and enhancing interoperability and ease of integration.",
+    "main_decision": "The decision is to implement decentralized data management with polyglot persistence, where each microservice manages its own database. Services can choose different data storage technologies based on their specific requirements, enhancing performance and scalability.",
     "alternatives": [
-      "Use a custom communication protocol",
-      "Implement gRPC for communication"
+      "Centralized database shared by all services.",
+      "Hybrid approach with some shared and some independent databases."
     ],
-    "pros": "- Main decision:\n  - Pros:\n    - Standardized and widely adopted communication style\n    - Seamless integration with AWS Lambda and API Gateway\n    - Enhanced interoperability and ease of integration\n- Alternative 1:\n  - Pros:\n    - Full control over communication protocol\n    - Potential for optimized performance\n- Alternative 2:\n  - Pros:\n    - High-performance communication with binary protocol\n    - Strongly typed APIs with gRPC",
-    "cons": "- Main decision:\n  - Cons:\n    - Potential network latency with synchronous communication\n    - Dependency on HTTP protocol\n- Alternative 1:\n  - Cons:\n    - Higher development and maintenance effort\n    - Potential interoperability challenges\n- Alternative 2:\n  - Cons:\n    - Requires additional expertise in gRPC\n    - May not integrate as seamlessly with AWS services",
-    "consequences": "Implementing RESTful communication via API Gateway ensures efficient and standardized communication, enhancing interoperability and ease of integration. However, it introduces potential network latency with synchronous communication and a dependency on the HTTP protocol. Proper configuration and management are necessary to mitigate these challenges.",
+    "pros": "- Main decision:\n  - Pros:\n    - Enhances service independence and scalability.\n    - Allows optimization of data storage for specific service needs.\n    - Reduces risk of data-related bottlenecks.\n- Alternative 1:\n  - Pros:\n    - Simplifies data management with a single database.\n    - Easier to implement and maintain initially.\n- Alternative 2:\n  - Pros:\n    - Balances independence with simplicity.\n    - Allows critical services to have independent data management.",
+    "cons": "- Main decision:\n  - Cons:\n    - Increases complexity in managing multiple databases.\n    - Requires careful design to handle data consistency and integrity.\n- Alternative 1:\n  - Cons:\n    - Limits scalability and independence of services.\n    - Potential for data-related bottlenecks and failures.\n- Alternative 2:\n  - Cons:\n    - Complexity in managing both shared and independent databases.\n    - May not fully realize the benefits of decentralized data management.",
+    "consequences": "Decentralized data management enhances service independence, scalability, and performance. It introduces complexity in managing multiple databases and requires careful design for data consistency. The decision aligns with best practices for microservices data management.",
     "validation": "Validation to be defined in future iterations.",
-    "additional_information": "N/A",
-    "source_file": "ADR_5.txt"
+    "additional_information": "- Related ADRs: None\n```\n\n```markdown",
+    "source_file": "abelaa_ADR_5.txt"
   },
   {
-    "adr_name": "Absence of Asynchronous Communication",
-    "title": "Absence of Asynchronous Communication",
+    "adr_name": "Implement Continuous Integration and Continuous Deployment (CI/CD)",
+    "title": "Implement Continuous Integration and Continuous Deployment (CI/CD)",
     "status": "Accepted",
-    "motivation": "The current architecture relies on synchronous communication via RESTful APIs, which may limit resilience and decoupling. While asynchronous communication could enhance these attributes, the decision to initially focus on synchronous communication simplifies the architecture and aligns with current system requirements.",
+    "motivation": "To support the rapid development and deployment of microservices, a robust CI/CD pipeline is essential. It automates the integration, testing, and deployment processes, ensuring that changes can be delivered quickly and reliably.",
     "decision_drivers": [
-      "Current system requirements for synchronous communication",
-      "Desire for simplified architecture and reduced complexity",
-      "Consideration of potential future adoption of asynchronous communication"
+      "Requirement for rapid and reliable deployment of services.",
+      "Need to support agile development practices.",
+      "Desire to improve testing and quality assurance processes."
     ],
-    "main_decision": "The decision is to initially focus on synchronous communication via RESTful APIs, facilitated by AWS API Gateway. While asynchronous communication could enhance resilience and decoupling, the current system requirements and desire for a simplified architecture justify",
+    "main_decision": "The",
     "alternatives": [],
     "pros": "",
     "cons": "",
     "consequences": "",
     "validation": "",
     "additional_information": "",
-    "source_file": "ADR_6.txt"
-  },
-  {
-    "adr_name": null,
-    "title": "",
-    "status": "",
-    "motivation": "",
-    "decision_drivers": [],
-    "main_decision": "",
-    "alternatives": [],
-    "pros": "",
-    "cons": "",
-    "consequences": "",
-    "validation": "",
-    "additional_information": "",
-    "source_file": "adr_repositories_git_urls.txt"
+    "source_file": "abelaa_ADR_6.txt"
   }
 ]
